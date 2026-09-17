@@ -34,10 +34,8 @@ export default function generate(THREE) {
   const neckGeo = new THREE.CylinderGeometry(0.15, 0.2, 0.15, 32);
   const capGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.08, 32);
   const ringGeo = new THREE.TorusGeometry(0.16, 0.02, 16, 32);
-  const handleGeo = new THREE.TorusGeometry(0.12, 0.025, 16, 32, Math.PI);
+  const handleGeo = new THREE.TorusGeometry(0.12, 0.02, 16, 32, Math.PI);
   const labelGeo = new THREE.CylinderGeometry(0.305, 0.305, 0.15, 32, 1, true);
-  const strawGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.5, 16);
-  const lidGeo = new THREE.CylinderGeometry(0.31, 0.31, 0.02, 32);
 
   // Base
   const base = new THREE.Mesh(baseGeo, darkMat);
@@ -61,10 +59,10 @@ export default function generate(THREE) {
 
   // Cap
   const cap = new THREE.Mesh(capGeo, metalMat);
-  cap.position.y = 0.39;
+  cap.position.y = 0.4;
   root.add(cap);
 
-  // Ring
+  // Ring under cap
   const ring = new THREE.Mesh(ringGeo, metalMat);
   ring.position.y = 0.35;
   ring.rotation.x = Math.PI / 2;
@@ -76,20 +74,17 @@ export default function generate(THREE) {
   handle.rotation.z = Math.PI / 2;
   root.add(handle);
 
-  // Straw
-  const straw = new THREE.Mesh(strawGeo, darkMat);
-  straw.position.set(0.1, 0.3, 0);
-  straw.rotation.z = -Math.PI / 6;
-  root.add(straw);
+  // Second handle on opposite side
+  const handle2 = new THREE.Mesh(handleGeo, metalMat);
+  handle2.position.set(-0.3, 0.1, 0);
+  handle2.rotation.z = -Math.PI / 2;
+  root.add(handle2);
 
-  // Lid
-  const lid = new THREE.Mesh(lidGeo, metalMat);
-  lid.position.y = 0.2;
-  root.add(lid);
-
-  // Scale down to fit in unit cube
-  const scale = 0.9;
-  root.scale.set(scale, scale, scale);
+  // Lid top detail
+  const lidTopGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.02, 32);
+  const lidTop = new THREE.Mesh(lidTopGeo, metalMat);
+  lidTop.position.y = 0.45;
+  root.add(lidTop);
 
   return root;
 }

@@ -30,14 +30,12 @@ export default function generate(THREE) {
 
   // Geometries
   const baseGeo = new THREE.CylinderGeometry(0.35, 0.38, 0.05, 32);
-  const bodyGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.4, 32);
-  const neckGeo = new THREE.CylinderGeometry(0.15, 0.2, 0.15, 32);
-  const capGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.08, 32);
+  const bodyGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.4, 32);
+  const neckGeo = new THREE.CylinderGeometry(0.15, 0.3, 0.15, 32);
+  const capGeo = new THREE.CylinderGeometry(0.16, 0.15, 0.08, 32);
   const ringGeo = new THREE.TorusGeometry(0.16, 0.02, 16, 32);
   const handleGeo = new THREE.TorusGeometry(0.12, 0.025, 16, 32, Math.PI);
   const labelGeo = new THREE.CylinderGeometry(0.305, 0.305, 0.15, 32, 1, true);
-  const strawGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.5, 16);
-  const lidGeo = new THREE.CylinderGeometry(0.31, 0.31, 0.02, 32);
 
   // Base
   const base = new THREE.Mesh(baseGeo, darkMat);
@@ -51,7 +49,7 @@ export default function generate(THREE) {
 
   // Label
   const label = new THREE.Mesh(labelGeo, glassMat);
-  label.position.y = 0;
+  label.position.y = 0.05;
   root.add(label);
 
   // Neck
@@ -61,12 +59,12 @@ export default function generate(THREE) {
 
   // Cap
   const cap = new THREE.Mesh(capGeo, metalMat);
-  cap.position.y = 0.39;
+  cap.position.y = 0.4;
   root.add(cap);
 
-  // Ring
+  // Ring under cap
   const ring = new THREE.Mesh(ringGeo, metalMat);
-  ring.position.y = 0.35;
+  ring.position.y = 0.36;
   ring.rotation.x = Math.PI / 2;
   root.add(ring);
 
@@ -76,20 +74,8 @@ export default function generate(THREE) {
   handle.rotation.z = Math.PI / 2;
   root.add(handle);
 
-  // Straw
-  const straw = new THREE.Mesh(strawGeo, darkMat);
-  straw.position.set(0.1, 0.3, 0);
-  straw.rotation.z = -Math.PI / 6;
-  root.add(straw);
-
-  // Lid
-  const lid = new THREE.Mesh(lidGeo, metalMat);
-  lid.position.y = 0.2;
-  root.add(lid);
-
-  // Scale down to fit in unit cube
-  const scale = 0.9;
-  root.scale.set(scale, scale, scale);
+  // Scale to fit in unit cube
+  root.scale.set(0.8, 0.8, 0.8);
 
   return root;
 }

@@ -7,7 +7,6 @@ export default function generate(THREE) {
     metalness: 0.4,
     roughness: 0.3,
   });
-
   const glassMat = new THREE.MeshStandardMaterial({
     color: 0x87ceeb,
     metalness: 0.1,
@@ -15,13 +14,11 @@ export default function generate(THREE) {
     transparent: true,
     opacity: 0.6,
   });
-
   const metalMat = new THREE.MeshStandardMaterial({
     color: 0xbdc3c7,
     metalness: 0.8,
     roughness: 0.2,
   });
-
   const darkMat = new THREE.MeshStandardMaterial({
     color: 0x1a1a1a,
     metalness: 0.1,
@@ -37,7 +34,7 @@ export default function generate(THREE) {
   const handleGeo = new THREE.TorusGeometry(0.12, 0.025, 16, 32, Math.PI);
   const labelGeo = new THREE.CylinderGeometry(0.305, 0.305, 0.15, 32, 1, true);
   const strawGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.5, 16);
-  const lidGeo = new THREE.CylinderGeometry(0.31, 0.31, 0.02, 32);
+  const lidGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.02, 32);
 
   // Base
   const base = new THREE.Mesh(baseGeo, darkMat);
@@ -78,13 +75,13 @@ export default function generate(THREE) {
 
   // Straw
   const straw = new THREE.Mesh(strawGeo, darkMat);
-  straw.position.set(0.1, 0.3, 0);
-  straw.rotation.z = -Math.PI / 6;
+  straw.position.set(0.05, 0.3, 0);
+  straw.rotation.z = 0.2;
   root.add(straw);
 
   // Lid
   const lid = new THREE.Mesh(lidGeo, metalMat);
-  lid.position.y = 0.2;
+  lid.position.y = 0.43;
   root.add(lid);
 
   // Scale down to fit in unit cube

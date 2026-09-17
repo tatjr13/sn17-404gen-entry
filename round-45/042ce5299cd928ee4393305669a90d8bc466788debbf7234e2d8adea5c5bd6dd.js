@@ -30,9 +30,9 @@ export default function generate(THREE) {
 
   // Geometries
   const baseGeo = new THREE.CylinderGeometry(0.35, 0.38, 0.05, 32);
-  const bodyGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.4, 32);
-  const neckGeo = new THREE.CylinderGeometry(0.15, 0.2, 0.15, 32);
-  const capGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.08, 32);
+  const bodyGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.4, 32);
+  const neckGeo = new THREE.CylinderGeometry(0.15, 0.3, 0.15, 32);
+  const capGeo = new THREE.CylinderGeometry(0.16, 0.15, 0.08, 32);
   const ringGeo = new THREE.TorusGeometry(0.16, 0.02, 16, 32);
   const handleGeo = new THREE.TorusGeometry(0.12, 0.025, 16, 32, Math.PI);
   const labelGeo = new THREE.CylinderGeometry(0.305, 0.305, 0.15, 32, 1, true);
@@ -51,7 +51,7 @@ export default function generate(THREE) {
 
   // Label
   const label = new THREE.Mesh(labelGeo, glassMat);
-  label.position.y = 0;
+  label.position.y = 0.05;
   root.add(label);
 
   // Neck
@@ -84,7 +84,7 @@ export default function generate(THREE) {
 
   // Lid
   const lid = new THREE.Mesh(lidGeo, metalMat);
-  lid.position.y = 0.2;
+  lid.position.y = 0.22;
   root.add(lid);
 
   // Scale down to fit in unit cube

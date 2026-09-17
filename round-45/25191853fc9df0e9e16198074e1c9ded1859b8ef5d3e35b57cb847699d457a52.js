@@ -24,7 +24,7 @@ export default function generate(THREE) {
 
   const darkMat = new THREE.MeshStandardMaterial({
     color: 0x1a1a1a,
-    metalness: 0.1,
+    metalness: 0.2,
     roughness: 0.8,
   });
 
@@ -36,8 +36,6 @@ export default function generate(THREE) {
   const ringGeo = new THREE.TorusGeometry(0.16, 0.02, 16, 32);
   const handleGeo = new THREE.TorusGeometry(0.12, 0.025, 16, 32, Math.PI);
   const labelGeo = new THREE.CylinderGeometry(0.305, 0.305, 0.15, 32, 1, true);
-  const strawGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.5, 16);
-  const lidGeo = new THREE.CylinderGeometry(0.31, 0.31, 0.02, 32);
 
   // Base
   const base = new THREE.Mesh(baseGeo, darkMat);
@@ -61,10 +59,10 @@ export default function generate(THREE) {
 
   // Cap
   const cap = new THREE.Mesh(capGeo, metalMat);
-  cap.position.y = 0.39;
+  cap.position.y = 0.4;
   root.add(cap);
 
-  // Ring
+  // Ring under cap
   const ring = new THREE.Mesh(ringGeo, metalMat);
   ring.position.y = 0.35;
   ring.rotation.x = Math.PI / 2;
@@ -76,20 +74,14 @@ export default function generate(THREE) {
   handle.rotation.z = Math.PI / 2;
   root.add(handle);
 
-  // Straw
-  const straw = new THREE.Mesh(strawGeo, darkMat);
-  straw.position.set(0.1, 0.3, 0);
-  straw.rotation.z = -Math.PI / 6;
-  root.add(straw);
-
-  // Lid
-  const lid = new THREE.Mesh(lidGeo, metalMat);
-  lid.position.y = 0.2;
-  root.add(lid);
-
-  // Scale down to fit in unit cube
-  const scale = 0.9;
-  root.scale.set(scale, scale, scale);
+  // Add some decorative lines on the body
+  const lineGeo = new THREE.TorusGeometry(0.302, 0.005, 8, 32);
+  for (let i = 0; i < 3; i++) {
+    const line = new THREE.Mesh(lineGeo, metalMat);
+    line.position.y = -0.1 + i * 0.1;
+    line.rotation.x = Math.PI / 2;
+    root.add(line);
+  }
 
   return root;
 }

@@ -1,0 +1,6 @@
+validator/node_modules/
+__pycache__/
+*.pyc
+runs/
+out-*/
+*.gguf

@@ -49,7 +49,15 @@ HOST = os.environ.get("HOST", "0.0.0.0")  # api_spec: NOT 127.0.0.1
 # llama-server lifecycle
 # ---------------------------------------------------------------------------
 LLAMA_SERVER = os.environ.get("LLAMA_SERVER", "llama-server")
-MODEL_PATH = os.environ.get("MODEL_PATH", "/models/gguf/model.gguf")
+# The Dockerfile bakes the GGUF under its UPSTREAM filename and exports MODEL_FILE
+# (docker/Dockerfile:81,94). Deriving the path from that name is the whole point:
+# a hardcoded "/models/gguf/model.gguf" default does not exist in the image, and
+# the failure is silent in exactly the wrong way — llama-server starts, fails to
+# find its weights, never answers /health, and the pod sits in `warming_up` until
+# the warmup budget is gone and the orchestrator replaces it. Observed directly
+# on the built image (2026-09-17): status stayed "loading model" indefinitely.
+MODEL_FILE = os.environ.get("MODEL_FILE", "model.gguf")
+MODEL_PATH = os.environ.get("MODEL_PATH", f"/models/gguf/{MODEL_FILE}")
 # Four GPUs are available on the verification pod; split layers across all of
 # them. A single-card 32GB card (our local dev box) can hold the Q4_K_M model
 # whole, so the local path uses the default split and this is only overridden
@@ -98,12 +106,32 @@ pod = Pod()
 # ---------------------------------------------------------------------------
 # llama-server
 # ---------------------------------------------------------------------------
+class MissingModelError(RuntimeError):
+    """The llama-server binary is present but its GGUF is not.
+
+    Separate from FileNotFoundError because the two mean opposite things: a
+    missing BINARY is the CPU build proof (expected, harmless), a missing MODEL
+    is a broken image (must surface). Conflating them reports `ready` on a
+    container that can never generate.
+    """
+
+
 def start_llama_server() -> subprocess.Popen:
     """Start llama-server on localhost with the pinned GGUF.
 
     Overrides the model path/port at runtime; the file itself is baked into the
     image at build time so no download and no HF token is needed here.
     """
+    # Fail loudly on a missing model instead of spawning a doomed process. The
+    # 600s health timeout is the warmup budget; discovering a bad path by burning
+    # all of it is the worst case, and it is entirely avoidable — the file is
+    # known at container start.
+    if not Path(MODEL_PATH).is_file():
+        raise MissingModelError(
+            f"model not found at {MODEL_PATH!r} (MODEL_FILE={MODEL_FILE!r}); "
+            f"/models/gguf contains: {sorted(p.name for p in Path('/models/gguf').glob('*'))}"
+        )
+
     cmd = [
         LLAMA_SERVER,
         "--model", MODEL_PATH,
@@ -352,9 +380,19 @@ async def on_startup() -> None:
         pod.warmup_note = "starting llama-server"
         try:
             pod.llama_proc = start_llama_server()
+        except MissingModelError as e:
+            # The binary is there but its weights are not. This is NOT the CPU
+            # build proof below: it means the image is wrong, and reporting
+            # `ready` would hide a broken submission behind a green status. Ask
+            # for a replacement pod, which is what the spec's `replace` state is
+            # for, and say exactly what is missing.
+            pod.warmup_note = f"model missing: {e}"
+            pod.status = State.REPLACE if pod.replacements_remaining > 0 else State.READY
+            log(f"FATAL {pod.warmup_note}")
+            return
         except FileNotFoundError:
-            # No llama-server binary (CPU-only build proof). Nothing to load;
-            # the service is still spec-conformant, just reports ready.
+            # No llama-server BINARY at all (CPU-only build proof). Nothing to
+            # load; the service is still spec-conformant, just reports ready.
             pod.warmup_note = "llama-server not present (CPU build proof)"
             pod.status = State.READY
             log(pod.warmup_note)

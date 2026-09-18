@@ -85,6 +85,27 @@ docker run --gpus all -p 10006:10006 sn17-404gen-entry
 curl -s localhost:10006/status | jq
 ```
 
+### `--gpus all` is required, and this is verified rather than assumed
+
+`llama-server` is built `-DGGML_CUDA=ON`, so it links `libcudart.so.12` and
+`libcublas.so.12` from the CUDA runtime and `libcuda.so.1` from the host driver.
+Started **without** `--gpus all` it dies in the dynamic linker:
+
+```
+llama-server: error while loading shared libraries: libcuda.so.1: cannot open
+shared object file: No such file or directory
+```
+
+and the pod correctly stays in `warming_up` rather than reporting a false `ready`.
+Started **with** `--gpus all` it loads the baked-in GGUF and reaches `ready` in
+~19 s on a single 32 GB card (measured on the built image, 2026-09-18T00:04Z).
+The orchestrator's verification pod supplies the GPUs; the observe-the-failure
+case above is what a misconfigured pod looks like, and it is deliberately loud.
+
+A missing **model file** is a different failure and is treated differently:
+it raises `MissingModelError` and asks for a replacement pod, because a broken
+image must not be reported as `ready` (see `miner_service.py`).
+
 ## License
 
 Code in this repository is released under the MIT License. The pinned
